@@ -1,0 +1,37 @@
+{
+  "name": "@rag-extension/ui",
+  "version": "0.1.0",
+  "description": "Shared UI design tokens and React components",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist", "tokens"],
+  "exports": {
+    ".": "./dist/index.js",
+    "./tokens.css": "./tokens/index.css",
+    "./tokens": "./dist/tokens/index.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/**/*.tsx --format esm --dts --sourcemap",
+    "dev": "echo 'packages/ui has no dev server'",
+    "lint": "eslint src --max-warnings 0",
+    "type-check": "tsc --noEmit",
+    "test": "echo 'packages/ui has no tests'",
+    "clean": "rm -rf dist .turbo"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@rag-extension/config": "workspace:*",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "tsup": "catalog:"
+  }
+}

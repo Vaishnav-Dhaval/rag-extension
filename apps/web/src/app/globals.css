@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font-family: var(--rag-font-family);
+  color: var(--rag-color-text-primary);
+  background-color: var(--rag-color-bg-primary);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--rag-color-primary-600);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}

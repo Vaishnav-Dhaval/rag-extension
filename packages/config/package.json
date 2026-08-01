@@ -1,0 +1,20 @@
+{
+  "name": "@rag-extension/config",
+  "version": "0.1.0",
+  "description": "Shared ESLint, Prettier, TypeScript, and Tailwind configuration",
+  "private": true,
+  "files": ["src"],
+  "scripts": {
+    "lint": "echo 'packages/config is a tool package'"
+  },
+  "devDependencies": {
+    "@types/eslint__js": "^8.42.0",
+    "eslint": "catalog:",
+    "@typescript-eslint/eslint-plugin": "catalog:",
+    "@typescript-eslint/parser": "catalog:",
+    "prettier": "catalog:",
+    "typescript": "catalog:",
+    "tailwindcss": "catalog:",
+    "@tailwindcss/forms": "catalog:"
+  }
+}

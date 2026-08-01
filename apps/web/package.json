@@ -1,0 +1,40 @@
+{
+  "name": "@rag-extension/web",
+  "version": "0.1.0",
+  "description": "Next.js backend with AI reply generation API",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --port 3000",
+    "start": "next start",
+    "lint": "eslint . --max-warnings 0 --ext .ts,.tsx",
+    "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "clean": "rm -rf .next dist .turbo"
+  },
+  "dependencies": {
+    "@rag-extension/shared": "workspace:*",
+    "@rag-extension/api": "workspace:*",
+    "@rag-extension/ai": "workspace:*",
+    "@rag-extension/ui": "workspace:*",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@rag-extension/config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "catalog:",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "vitest": "catalog:",
+    "happy-dom": "catalog:",
+    "tailwindcss": "catalog:",
+    "@tailwindcss/forms": "catalog:",
+    "postcss": "^8.4.0"
+  }
+}

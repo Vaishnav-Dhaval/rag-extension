@@ -1,0 +1,30 @@
+{
+  "name": "@rag-extension/extension",
+  "version": "0.1.0",
+  "description": "Chrome extension for X.com reply generation",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "lint": "eslint src --max-warnings 0",
+    "type-check": "tsc --noEmit",
+    "test": "echo 'Extension has no tests yet'",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@rag-extension/shared": "workspace:*",
+    "@rag-extension/api": "workspace:*",
+    "@rag-extension/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "@rag-extension/config": "workspace:*",
+    "@crxjs/vite-plugin": "catalog:",
+    "@types/chrome": "^0.0.242",
+    "@types/node": "^22.0.0",
+    "typescript": "catalog:",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "vite": "catalog:"
+  }
+}

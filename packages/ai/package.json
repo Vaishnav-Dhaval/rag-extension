@@ -1,0 +1,38 @@
+{
+  "name": "@rag-extension/ai",
+  "version": "0.1.0",
+  "description": "AI provider abstraction with Groq and Gemini implementations",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "exports": {
+    ".": "./dist/index.js",
+    "./providers": "./dist/providers/index.js",
+    "./prompts": "./dist/prompts/index.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/**/*.ts --format esm --dts --sourcemap",
+    "dev": "echo 'packages/ai has no dev server'",
+    "lint": "eslint src --max-warnings 0",
+    "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@rag-extension/shared": "workspace:*",
+    "groq-sdk": "catalog:",
+    "@google/generative-ai": "catalog:"
+  },
+  "devDependencies": {
+    "@rag-extension/config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "typescript": "catalog:",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "vitest": "catalog:",
+    "vitest-mock-extended": "catalog:",
+    "happy-dom": "catalog:",
+    "tsup": "catalog:"
+  }
+}

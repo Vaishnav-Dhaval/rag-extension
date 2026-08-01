@@ -1,0 +1,101 @@
+:root {
+  --rag-color-primary-50: #f0f9ff;
+  --rag-color-primary-100: #e0f2fe;
+  --rag-color-primary-200: #bae6fd;
+  --rag-color-primary-300: #7dd3fc;
+  --rag-color-primary-400: #38bdf8;
+  --rag-color-primary-500: #0ea5e9;
+  --rag-color-primary-600: #0284c7;
+  --rag-color-primary-700: #0369a1;
+  --rag-color-primary-800: #075985;
+  --rag-color-primary-900: #0c3d66;
+
+  --rag-color-neutral-50: #fafafa;
+  --rag-color-neutral-100: #f5f5f5;
+  --rag-color-neutral-200: #e5e5e5;
+  --rag-color-neutral-300: #d4d4d4;
+  --rag-color-neutral-400: #a3a3a3;
+  --rag-color-neutral-500: #737373;
+  --rag-color-neutral-600: #525252;
+  --rag-color-neutral-700: #404040;
+  --rag-color-neutral-800: #262626;
+  --rag-color-neutral-900: #171717;
+
+  --rag-color-success-50: #f0fdf4;
+  --rag-color-success-500: #22c55e;
+  --rag-color-success-600: #16a34a;
+  --rag-color-success-900: #14532d;
+
+  --rag-color-error-50: #fef2f2;
+  --rag-color-error-500: #ef4444;
+  --rag-color-error-600: #dc2626;
+  --rag-color-error-900: #7f1d1d;
+
+  --rag-color-warning-50: #fffbeb;
+  --rag-color-warning-500: #eab308;
+  --rag-color-warning-600: #ca8a04;
+  --rag-color-warning-900: #78350f;
+
+  --rag-color-bg-primary: var(--rag-color-neutral-50);
+  --rag-color-bg-secondary: var(--rag-color-neutral-100);
+  --rag-color-bg-tertiary: var(--rag-color-neutral-200);
+
+  --rag-color-text-primary: var(--rag-color-neutral-900);
+  --rag-color-text-secondary: var(--rag-color-neutral-600);
+  --rag-color-text-tertiary: var(--rag-color-neutral-500);
+
+  --rag-color-border: var(--rag-color-neutral-300);
+  --rag-color-border-light: var(--rag-color-neutral-200);
+
+  --rag-space-1: 0.25rem;
+  --rag-space-2: 0.5rem;
+  --rag-space-3: 0.75rem;
+  --rag-space-4: 1rem;
+  --rag-space-6: 1.5rem;
+  --rag-space-8: 2rem;
+  --rag-space-12: 3rem;
+  --rag-space-16: 4rem;
+
+  --rag-radius-sm: 0.375rem;
+  --rag-radius-md: 0.5rem;
+  --rag-radius-lg: 0.75rem;
+  --rag-radius-xl: 1rem;
+
+  --rag-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --rag-font-size-xs: 0.75rem;
+  --rag-font-size-sm: 0.875rem;
+  --rag-font-size-base: 1rem;
+  --rag-font-size-lg: 1.125rem;
+  --rag-font-size-xl: 1.25rem;
+
+  --rag-font-weight-normal: 400;
+  --rag-font-weight-medium: 500;
+  --rag-font-weight-semibold: 600;
+  --rag-font-weight-bold: 700;
+
+  --rag-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --rag-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --rag-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --rag-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --rag-color-bg-primary: var(--rag-color-neutral-900);
+    --rag-color-bg-secondary: var(--rag-color-neutral-800);
+    --rag-color-bg-tertiary: var(--rag-color-neutral-700);
+
+    --rag-color-text-primary: var(--rag-color-neutral-50);
+    --rag-color-text-secondary: var(--rag-color-neutral-400);
+    --rag-color-text-tertiary: var(--rag-color-neutral-500);
+
+    --rag-color-border: var(--rag-color-neutral-700);
+    --rag-color-border-light: var(--rag-color-neutral-800);
+  }
+}
+
+body {
+  font-family: var(--rag-font-family);
+  color: var(--rag-color-text-primary);
+  background-color: var(--rag-color-bg-primary);
+}

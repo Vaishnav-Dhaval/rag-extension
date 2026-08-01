@@ -1,0 +1,36 @@
+{
+  "name": "@rag-extension/api",
+  "version": "0.1.0",
+  "description": "Shared API contracts, schemas, and client",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "exports": {
+    ".": "./dist/index.js",
+    "./schemas": "./dist/schemas/index.js",
+    "./types": "./dist/types/index.js",
+    "./client": "./dist/client/index.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/**/*.ts --format esm --dts --sourcemap",
+    "dev": "echo 'packages/api has no dev server'",
+    "lint": "eslint src --max-warnings 0",
+    "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@rag-extension/shared": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@rag-extension/config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "typescript": "catalog:",
+    "eslint": "catalog:",
+    "prettier": "catalog:",
+    "vitest": "catalog:",
+    "tsup": "catalog:"
+  }
+}
