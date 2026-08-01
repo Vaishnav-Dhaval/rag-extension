@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "AI-powered Chrome extension for generating X.com replies with Groq/Gemini backend",
+  "packageManager": "pnpm@10.19.0",
   "engines": {
     "node": "22.x",
     "pnpm": "10.x"

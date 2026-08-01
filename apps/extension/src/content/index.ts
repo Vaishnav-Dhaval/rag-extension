@@ -1,7 +1,9 @@
 import { createPlatformAdapter } from './platforms/x-adapter';
+import { createLogger, categorizeError } from '@rag-extension/shared/logger';
 import type { ExtensionMessage } from '../types/messages';
 
 const adapter = createPlatformAdapter();
+const logger = createLogger('extension:content');
 
 chrome.runtime.onMessage.addListener(
   (
@@ -10,7 +12,9 @@ chrome.runtime.onMessage.addListener(
     sendResponse: (response?: unknown) => void,
   ) => {
     if (message.type === 'EXTRACT_COMPOSE_TEXT_REQUEST') {
+      logger.debug('extract compose text request', { requestId: message.requestId });
       const sourceText = messageExtractComposeText(message as any);
+      logger.debug('extract compose text response', { requestId: message.requestId, success: sourceText !== null });
 
       sendResponse({
         type: 'EXTRACT_COMPOSE_TEXT_RESPONSE',
@@ -18,6 +22,7 @@ chrome.runtime.onMessage.addListener(
         sourceText,
       });
     } else if (message.type === 'INSERT_REPLY_REQUEST') {
+      logger.debug('insert reply request', { requestId: message.requestId, textLength: (message as any).text.length });
       messageInsertReply(message as any, sendResponse);
       return true;
     }
@@ -31,7 +36,10 @@ function messageExtractComposeText(
     const sourceText = detectReplyTargetSync();
     return sourceText;
   } catch (error) {
-    console.error('Error extracting compose text:', error);
+    logger.error('extract compose text failed', {
+      requestId: message.requestId,
+      errorType: categorizeError(error).type,
+    });
     return null;
   }
 }
@@ -43,6 +51,14 @@ function messageInsertReply(
   adapter
     .insertText(message.text)
     .then((success) => {
+      if (success) {
+        logger.info('reply inserted successfully', { requestId: message.requestId });
+      } else {
+        logger.warn('reply insertion failed', {
+          requestId: message.requestId,
+          reason: 'Failed to locate or insert into compose box',
+        });
+      }
       sendResponse({
         type: 'INSERT_REPLY_RESPONSE',
         requestId: message.requestId,
@@ -51,7 +67,12 @@ function messageInsertReply(
       });
     })
     .catch((error) => {
-      console.error('Error inserting reply:', error);
+      const errorCategory = categorizeError(error);
+      logger.error('reply insertion failed', {
+        requestId: message.requestId,
+        errorType: errorCategory.type,
+        errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      });
       sendResponse({
         type: 'INSERT_REPLY_RESPONSE',
         requestId: message.requestId,
