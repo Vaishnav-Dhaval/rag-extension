@@ -1,4 +1,4 @@
-import React from 'react';
+import type { JSX } from 'react';
 
 export interface SpinnerProps {
   readonly size?: 'sm' | 'md' | 'lg';

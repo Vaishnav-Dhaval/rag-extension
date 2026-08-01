@@ -41,15 +41,15 @@ export class GenerateClient {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        let errorData: Record<string, unknown> | undefined;
+        let errorData: unknown;
         try {
           errorData = await response.json();
         } catch {
           // Ignore JSON parse errors for non-ok responses
         }
 
-        const errorCode = (errorData?.error as Record<string, unknown>)?.code || 'INTERNAL_ERROR';
-        const errorMessage = (errorData?.error as Record<string, unknown>)?.message || response.statusText;
+        const errorCode = ((errorData as Record<string, unknown>)?.error as Record<string, unknown>)?.code || 'INTERNAL_ERROR';
+        const errorMessage = ((errorData as Record<string, unknown>)?.error as Record<string, unknown>)?.message || response.statusText;
 
         throw new AppError(String(errorMessage), {
           code: errorCode as any,

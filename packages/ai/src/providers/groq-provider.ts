@@ -1,5 +1,4 @@
 import Groq from 'groq-sdk';
-import { createLogger } from '@rag-extension/shared';
 import {
   ProviderTimeoutError,
   ProviderRateLimitError,
@@ -9,8 +8,6 @@ import {
 } from './errors';
 import { AIProvider, GenerateReplyParams, GenerateReplyOutput, ProviderConfig } from './provider';
 import { buildReplyMessages } from '../prompts';
-
-const logger = createLogger('groq-provider');
 
 function classifyGroqError(error: unknown, timeoutMs: number): Error {
   if (error instanceof Error) {

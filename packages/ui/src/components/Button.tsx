@@ -1,4 +1,5 @@
 import React from 'react';
+import type { JSX } from 'react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   readonly variant?: 'primary' | 'secondary' | 'danger';

@@ -9,7 +9,7 @@
   "exports": {
     ".": "./dist/index.js",
     "./tokens.css": "./tokens/index.css",
-    "./tokens": "./dist/tokens/index.js"
+    "./tokens": "./tokens/tokens.ts"
   },
   "scripts": {
     "build": "tsup src/index.ts src/**/*.tsx --format esm --dts --sourcemap",

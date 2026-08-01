@@ -17,21 +17,66 @@ let uiState: UIState = {
   error: null,
 };
 
+/**
+ * Chrome only injects declared content scripts on navigations that happen after
+ * the extension loads, so any tab opened beforehand (fresh install, extension
+ * reload, or update) has no listener and `sendMessage` rejects with
+ * "Receiving end does not exist". Probe first, then inject on demand.
+ */
+async function isContentScriptAlive(tabId: number): Promise<boolean> {
+  try {
+    await chrome.tabs.sendMessage(tabId, {
+      type: 'PING',
+      requestId: generateRequestId(),
+    } as ExtensionMessage);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function waitForContentScript(tabId: number): Promise<boolean> {
+  // The injected stub loads the real module via a dynamic import, so the
+  // listener registers a tick or two after executeScript resolves.
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    if (await isContentScriptAlive(tabId)) return true;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+  return false;
+}
+
+async function ensureContentScript(tabId: number): Promise<void> {
+  if (await isContentScriptAlive(tabId)) return;
+
+  const files = chrome.runtime.getManifest().content_scripts?.[0]?.js;
+  if (!files || files.length === 0) {
+    throw new Error('No content script is declared in the manifest.');
+  }
+
+  await chrome.scripting.executeScript({ target: { tabId }, files });
+
+  if (!(await waitForContentScript(tabId))) {
+    throw new Error('Content script was injected but never responded. Try reloading the X.com tab.');
+  }
+}
+
 async function initializePopup(): Promise<void> {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-    if (!tab.id || !isValidHost(tab.url)) {
+    if (!tab?.id || !isValidHost(tab.url)) {
       uiState.state = 'no-target';
       render();
       return;
     }
 
+    await ensureContentScript(tab.id);
+
     const requestId = generateRequestId();
-    const response = await chrome.tabs.sendMessage(tab.id, {
+    const response = (await chrome.tabs.sendMessage(tab.id, {
       type: 'EXTRACT_COMPOSE_TEXT_REQUEST',
       requestId,
-    } as ExtensionMessage);
+    } as ExtensionMessage)) as { sourceText: string | null };
 
     if (response.sourceText) {
       uiState.state = 'idle';
@@ -40,8 +85,14 @@ async function initializePopup(): Promise<void> {
       uiState.state = 'no-target';
     }
   } catch (error) {
+    // Surface the real failure instead of collapsing it into "no-target",
+    // which sends the user looking for the wrong problem.
     console.error('Error initializing popup:', error);
-    uiState.state = 'no-target';
+    uiState.state = 'error';
+    uiState.error = {
+      code: 'CONTENT_SCRIPT_UNAVAILABLE',
+      message: error instanceof Error ? error.message : 'Could not reach the X.com page.',
+    };
   }
 
   render();
@@ -91,7 +142,7 @@ async function handleInsertReply(requestId: string, reply: string): Promise<void
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-    if (!tab.id) return;
+    if (!tab?.id) return;
 
     await chrome.tabs.sendMessage(tab.id, {
       type: 'INSERT_REPLY_REQUEST',

@@ -1,4 +1,5 @@
 import React from 'react';
+import type { JSX } from 'react';
 
 export interface AlertProps {
   readonly variant?: 'success' | 'error' | 'warning' | 'info';

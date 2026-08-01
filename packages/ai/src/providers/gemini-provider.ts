@@ -1,5 +1,4 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { createLogger } from '@rag-extension/shared';
 import {
   ProviderTimeoutError,
   ProviderRateLimitError,
@@ -9,8 +8,6 @@ import {
 } from './errors';
 import { AIProvider, GenerateReplyParams, GenerateReplyOutput, ProviderConfig } from './provider';
 import { buildReplyMessages } from '../prompts';
-
-const logger = createLogger('gemini-provider');
 
 function classifyGeminiError(error: unknown, timeoutMs: number): Error {
   if (error instanceof Error) {
@@ -53,20 +50,22 @@ export class GeminiProvider implements AIProvider {
       const messages = buildReplyMessages(params.sourceText);
       const model = this.client.getGenerativeModel({ model: this.model });
 
-      const result = await Promise.race([
-        model.generateContent({
-          contents: [
-            {
-              role: 'user',
-              parts: [{ text: messages[messages.length - 1]!.content }],
-            },
-          ],
-          systemInstruction: messages[0]?.role === 'system' ? messages[0].content : undefined,
-          generationConfig: {
-            maxOutputTokens: 400,
-            temperature: 0.7,
+      const request = {
+        contents: [
+          {
+            role: 'user' as const,
+            parts: [{ text: messages[messages.length - 1]!.content }],
           },
-        }),
+        ],
+        ...(messages[0]?.role === 'system' && { systemInstruction: messages[0].content }),
+        generationConfig: {
+          maxOutputTokens: 400,
+          temperature: 0.7,
+        },
+      };
+
+      const result = await Promise.race([
+        model.generateContent(request),
         new Promise<never>((_, reject) => {
           signal.addEventListener('abort', () => reject(new Error('AbortError')));
         }),

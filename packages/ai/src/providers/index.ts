@@ -1,6 +1,6 @@
 import { createLogger } from '@rag-extension/shared';
 import { getServerEnv } from '@rag-extension/shared/env';
-import { AIProvider, GenerateReplyParams, GenerateReplyOutput } from './provider';
+import type { AIProvider } from './provider';
 import { GroqProvider } from './groq-provider';
 import { GeminiProvider } from './gemini-provider';
 import { AllProvidersFailedError } from './errors';
@@ -92,7 +92,7 @@ export async function generateReply(
     }
   }
 
-  throw new AllProvidersFailedError(failures, request.requestId);
+  throw new AllProvidersFailedError(failures);
 }
 
 export { type AIProvider, type GenerateReplyParams, type GenerateReplyOutput } from './provider';

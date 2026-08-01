@@ -106,40 +106,50 @@ export function categorizeError(err: unknown): ErrorCategory {
 }
 
 export function logStructuredError(
-  logger: Logger,
+  logger: ScopedLogger,
   err: unknown,
   context?: Record<string, unknown>,
   message?: string
 ): void {
   const category = categorizeError(err);
   const errorObj = err instanceof Error ? err : new Error(String(err));
-  const redacted = redactSensitive(context || {}) as Record<string, unknown>;
 
-  logger.error(
-    {
-      ...redacted,
-      errorType: category.type,
-      isRetryable: category.isRetryable,
-      errorCode: category.code,
-      errorMessage: errorObj.message,
-    },
-    message || 'error occurred'
-  );
+  logger.error(message || 'error occurred', {
+    ...context,
+    errorType: category.type,
+    isRetryable: category.isRetryable,
+    errorCode: category.code,
+    errorMessage: errorObj.message,
+  });
 }
 
-export function createLogger(scope: string): Logger {
+type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+
+/**
+ * Logger returned by {@link createLogger}. Deliberately narrower than pino's
+ * `Logger`: every method takes the event name first and an optional structured
+ * payload second, which is the reverse of pino's own argument order.
+ */
+export interface ScopedLogger {
+  debug(event: string, data?: unknown): void;
+  info(event: string, data?: unknown): void;
+  warn(event: string, data?: unknown): void;
+  error(event: string, data?: unknown): void;
+}
+
+export function createLogger(scope: string): ScopedLogger {
   const logger = createPinoLogger(scope);
 
-  const wrappedLogger: Logger = Object.assign(Object.create(Object.getPrototypeOf(logger)), logger, {
-    debug: (msg: unknown, obj?: unknown, ...rest: unknown[]) =>
-      logger.debug(typeof msg === 'string' ? (obj ? { data: redactSensitive(obj) } : {}) : msg, typeof msg === 'string' ? msg : String(obj), ...rest),
-    info: (msg: unknown, obj?: unknown, ...rest: unknown[]) =>
-      logger.info(typeof msg === 'string' ? (obj ? { data: redactSensitive(obj) } : {}) : msg, typeof msg === 'string' ? msg : String(obj), ...rest),
-    warn: (msg: unknown, obj?: unknown, ...rest: unknown[]) =>
-      logger.warn(typeof msg === 'string' ? (obj ? { data: redactSensitive(obj) } : {}) : msg, typeof msg === 'string' ? msg : String(obj), ...rest),
-    error: (msg: unknown, obj?: unknown, ...rest: unknown[]) =>
-      logger.error(typeof msg === 'string' ? (obj ? { data: redactSensitive(obj) } : {}) : msg, typeof msg === 'string' ? msg : String(obj), ...rest),
-  });
+  const emit =
+    (level: LogLevel) =>
+    (event: string, data?: unknown): void => {
+      logger[level](data === undefined ? {} : { data: redactSensitive(data) }, event);
+    };
 
-  return wrappedLogger;
+  return {
+    debug: emit('debug'),
+    info: emit('info'),
+    warn: emit('warn'),
+    error: emit('error'),
+  };
 }

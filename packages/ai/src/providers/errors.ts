@@ -60,7 +60,6 @@ export class ProviderInternalError extends AppError {
 export class AllProvidersFailedError extends AppError {
   constructor(
     readonly attempts: ReadonlyArray<{ provider: string; error: AppError }>,
-    requestId: string,
   ) {
     super(`All AI providers failed to generate a reply after ${attempts.length} attempts`, {
       code: 'ALL_PROVIDERS_FAILED',

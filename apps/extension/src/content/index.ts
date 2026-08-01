@@ -1,4 +1,5 @@
 import { createPlatformAdapter } from './platforms/x-adapter';
+import { detectReplyTarget } from './dom/compose-detector';
 import { createLogger, categorizeError } from '@rag-extension/shared/logger';
 import type { ExtensionMessage } from '../types/messages';
 
@@ -10,10 +11,17 @@ chrome.runtime.onMessage.addListener(
     message: ExtensionMessage,
     _sender: chrome.runtime.MessageSender,
     sendResponse: (response?: unknown) => void,
-  ) => {
+  ): boolean => {
+    // Liveness probe used by the popup to decide whether it must inject this
+    // script before messaging it. Must stay cheap and dependency-free.
+    if (message.type === 'PING') {
+      sendResponse({ type: 'PONG', requestId: message.requestId });
+      return false;
+    }
+
     if (message.type === 'EXTRACT_COMPOSE_TEXT_REQUEST') {
       logger.debug('extract compose text request', { requestId: message.requestId });
-      const sourceText = messageExtractComposeText(message as any);
+      const sourceText = messageExtractComposeText(message);
       logger.debug('extract compose text response', { requestId: message.requestId, success: sourceText !== null });
 
       sendResponse({
@@ -21,11 +29,17 @@ chrome.runtime.onMessage.addListener(
         requestId: message.requestId,
         sourceText,
       });
-    } else if (message.type === 'INSERT_REPLY_REQUEST') {
-      logger.debug('insert reply request', { requestId: message.requestId, textLength: (message as any).text.length });
-      messageInsertReply(message as any, sendResponse);
+      return false;
+    }
+
+    if (message.type === 'INSERT_REPLY_REQUEST') {
+      logger.debug('insert reply request', { requestId: message.requestId, textLength: message.text.length });
+      messageInsertReply(message, sendResponse);
+      // Keeps the message channel open for the async sendResponse above.
       return true;
     }
+
+    return false;
   },
 );
 
@@ -33,8 +47,7 @@ function messageExtractComposeText(
   message: { type: 'EXTRACT_COMPOSE_TEXT_REQUEST'; requestId: string },
 ): string | null {
   try {
-    const sourceText = detectReplyTargetSync();
-    return sourceText;
+    return detectReplyTarget();
   } catch (error) {
     logger.error('extract compose text failed', {
       requestId: message.requestId,
@@ -80,52 +93,4 @@ function messageInsertReply(
         reason: error instanceof Error ? error.message : 'Unknown error',
       });
     });
-}
-
-// Synchronous version for immediate response
-function detectReplyTargetSync(): string | null {
-  try {
-    const sourceText = detectReplyTargetSync_impl();
-    return sourceText;
-  } catch {
-    return null;
-  }
-}
-
-function detectReplyTargetSync_impl(): string | null {
-  const COMPOSE_TEXTAREA = '[data-testid^="tweetTextarea"][contenteditable="true"]';
-  const DIALOG = 'div[role="dialog"]';
-  const TWEET_ARTICLE = 'article[data-testid="tweet"]';
-  const TWEET_TEXT = '[data-testid="tweetText"]';
-
-  const activeTextarea = document.activeElement?.closest(COMPOSE_TEXTAREA);
-  let composeBox = activeTextarea as HTMLElement | null;
-
-  if (!composeBox) {
-    const allCompose = Array.from(document.querySelectorAll(COMPOSE_TEXTAREA));
-    const dialogCompose = allCompose.find((el) => el.closest(DIALOG));
-    composeBox = (dialogCompose || allCompose[0]) as HTMLElement | null;
-  }
-
-  if (!composeBox) {
-    return null;
-  }
-
-  const dialog = composeBox.closest(DIALOG);
-  if (!dialog) {
-    return null;
-  }
-
-  const tweet = dialog.querySelector(TWEET_ARTICLE);
-  if (!tweet) {
-    return null;
-  }
-
-  const tweetText = tweet.querySelector(TWEET_TEXT);
-  if (!tweetText) {
-    return null;
-  }
-
-  const text = (tweetText as HTMLElement).innerText?.trim();
-  return text && text.length > 0 ? text : null;
 }
