@@ -1,0 +1,17 @@
+{
+  "buildCommand": "pnpm run build",
+  "devCommand": "pnpm run dev",
+  "installCommand": "pnpm install",
+  "framework": "nextjs",
+  "rootDirectory": "apps/web",
+  "env": [
+    "GROQ_API_KEY",
+    "GEMINI_API_KEY",
+    "NEXT_PUBLIC_APP_URL"
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  }
+}
