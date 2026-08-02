@@ -26,7 +26,23 @@ let cached: ServerEnv | undefined;
 export function getServerEnv(): ServerEnv {
   if (cached) return cached;
 
-  const parsed = serverEnvSchema.safeParse(process.env);
+  // Each variable must be referenced statically. Bundlers that inline env vars
+  // (Next on the Edge runtime, Vite) cannot see through a bulk read of
+  // `process.env`, so passing the object wholesale yields undefined values.
+  const parsed = serverEnvSchema.safeParse({
+    NODE_ENV: process.env.NODE_ENV,
+    LOG_LEVEL: process.env.LOG_LEVEL,
+    GROQ_API_KEY: process.env.GROQ_API_KEY,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+    GROQ_MODEL: process.env.GROQ_MODEL,
+    GEMINI_MODEL: process.env.GEMINI_MODEL,
+    GROQ_TIMEOUT_MS: process.env.GROQ_TIMEOUT_MS,
+    GEMINI_TIMEOUT_MS: process.env.GEMINI_TIMEOUT_MS,
+    MAX_POST_LENGTH: process.env.MAX_POST_LENGTH,
+    MAX_PAYLOAD_BYTES: process.env.MAX_PAYLOAD_BYTES,
+    REQUEST_TIMEOUT_MS: process.env.REQUEST_TIMEOUT_MS,
+    ALLOWED_EXTENSION_ORIGINS: process.env.ALLOWED_EXTENSION_ORIGINS,
+  });
 
   if (!parsed.success) {
     const missing = Object.keys(parsed.error.flatten().fieldErrors);
