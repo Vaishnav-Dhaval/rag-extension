@@ -22,9 +22,10 @@ export function toErrorResponse(error: unknown, requestId: string): { status: nu
     status = 400;
     code = 'VALIDATION_ERROR';
     message = 'Request validation failed';
-    details = error.errors.map((err) => ({
-      path: err.path.join('.'),
-      message: err.message,
+    // Zod 4 renamed ZodError.errors to .issues.
+    details = error.issues.map((issue) => ({
+      path: issue.path.join('.'),
+      message: issue.message,
     }));
   } else if (error instanceof AppError) {
     status = error.statusCode;
@@ -65,7 +66,9 @@ export function toErrorResponse(error: unknown, requestId: string): { status: nu
         code,
         message,
         requestId,
-        details,
+        // Omit the key entirely rather than set it to undefined, which
+        // exactOptionalPropertyTypes rejects for an optional property.
+        ...(details && { details }),
       },
     },
   };

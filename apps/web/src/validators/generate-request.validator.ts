@@ -1,4 +1,3 @@
-import { ZodError } from 'zod';
 import { GenerateRequestSchema } from '@rag-extension/api';
 import type { GenerateRequest } from '@rag-extension/api';
 
