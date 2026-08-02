@@ -6,7 +6,9 @@ export default defineManifest({
   version: '0.1.0',
   description: 'Generate AI-powered replies on X.com',
   permissions: ['storage', 'scripting'],
-  host_permissions: ['https://x.com/*', 'https://twitter.com/*'],
+  // The local API origin is listed so the service worker's fetch bypasses CORS
+  // during development. Add the deployed API origin here too when shipping.
+  host_permissions: ['https://x.com/*', 'https://twitter.com/*', 'http://localhost:3000/*'],
   action: {
     default_popup: 'src/popup/index.html',
     default_title: 'Generate Reply',

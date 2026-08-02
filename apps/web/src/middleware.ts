@@ -1,61 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createLogger } from '@rag-extension/shared/logger';
-import { checkOrigin } from './lib/middleware/cors';
+import { checkOrigin, corsHeaders } from './lib/middleware/cors';
 
 const logger = createLogger('web:middleware');
 
+function withHeaders(response: NextResponse, headers: Record<string, string>): NextResponse {
+  for (const [key, value] of Object.entries(headers)) {
+    response.headers.set(key, value);
+  }
+  return response;
+}
+
+function forbidden(code: string, message: string, requestId: string): NextResponse {
+  // Deliberately no CORS headers: a rejected origin should surface to the
+  // browser as a CORS failure rather than let the caller read the body.
+  return NextResponse.json({ error: { code, message, requestId } }, { status: 403 });
+}
+
 export async function middleware(request: NextRequest): Promise<NextResponse> {
-  if (request.nextUrl.pathname.startsWith('/api/')) {
-    const origin = request.headers.get('origin');
-    const requestId = request.headers.get('x-request-id') || 'unknown';
+  if (!request.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
 
-    if (!origin) {
-      logger.warn('api request missing origin header', {
-        requestId,
-        pathname: request.nextUrl.pathname,
-        method: request.method,
-      });
-      return NextResponse.json(
-        {
-          error: {
-            code: 'ORIGIN_NOT_ALLOWED',
-            message: 'Missing Origin header',
-            requestId,
-          },
-        },
-        { status: 403 },
-      );
-    }
+  const origin = request.headers.get('origin');
+  const requestId = request.headers.get('x-request-id') || 'unknown';
 
-    const isAllowed = checkOrigin(origin);
-    if (!isAllowed) {
-      logger.warn('api request origin not allowed', {
-        requestId,
-        origin,
-        pathname: request.nextUrl.pathname,
-        method: request.method,
-      });
-      return NextResponse.json(
-        {
-          error: {
-            code: 'ORIGIN_NOT_ALLOWED',
-            message: 'Origin not allowed',
-            requestId,
-          },
-        },
-        { status: 403 },
-      );
-    }
+  if (!origin) {
+    logger.warn('api request missing origin header', {
+      requestId,
+      pathname: request.nextUrl.pathname,
+      method: request.method,
+    });
+    return forbidden('ORIGIN_NOT_ALLOWED', 'Missing Origin header', requestId);
+  }
 
-    logger.debug('api request origin validated', {
+  if (!checkOrigin(origin)) {
+    logger.warn('api request origin not allowed', {
       requestId,
       origin,
       pathname: request.nextUrl.pathname,
       method: request.method,
     });
+    return forbidden('ORIGIN_NOT_ALLOWED', 'Origin not allowed', requestId);
   }
 
-  return NextResponse.next();
+  // A cross-origin JSON POST is preflighted. The preflight never reaches the
+  // route handler, so it has to be answered here or the real request is never
+  // sent.
+  if (request.method === 'OPTIONS') {
+    logger.debug('cors preflight allowed', {
+      requestId,
+      origin,
+      pathname: request.nextUrl.pathname,
+    });
+    return withHeaders(new NextResponse(null, { status: 204 }), corsHeaders(origin));
+  }
+
+  logger.debug('api request origin validated', {
+    requestId,
+    origin,
+    pathname: request.nextUrl.pathname,
+    method: request.method,
+  });
+
+  return withHeaders(NextResponse.next(), corsHeaders(origin));
 }
 
 export const config = {

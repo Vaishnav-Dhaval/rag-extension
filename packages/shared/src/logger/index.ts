@@ -25,10 +25,10 @@ const createPinoLogger = (scope: string): Logger => {
     },
   };
 
-  if (!isProduction) {
-    return pino(options, pino.transport({ target: 'pino-pretty' }));
-  }
-
+  // No pretty-print transport: this module also runs in the browser (content
+  // script) and on Next's Edge runtime (middleware), where pino resolves to its
+  // browser build and exposes no `transport`. Worker-based transports are a
+  // Node-only feature, so calling one here throws before any log is emitted.
   return pino(options);
 };
 
